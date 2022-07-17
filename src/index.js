@@ -1,13 +1,51 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import axios from "axios";
+import Swal from "sweetalert2";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// For GET requests
+axios.interceptors.request.use(
+  (req) => {
+    // Add configurations here
+    req.headers["Authorization"] = "Bearer " + localStorage.getItem("access");
+    return req;
+  },
+  (err) => {
+    return Promise.reject(err);
+  }
+);
+
+// For POST requests
+axios.interceptors.response.use(
+  (res) => {
+    // Add configurations here
+    res.headers["Authorization"] = "Bearer " + localStorage.getItem("access");
+
+    if (res.status === 201) {
+      Swal.fire({
+        position: "center",
+        icon: "success",
+        title: res.data.success,
+        showConfirmButton: true,
+      });
+    }
+    return res;
+  },
+  (err) => {
+    return Promise.reject(err);
+  }
+);
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );
 
