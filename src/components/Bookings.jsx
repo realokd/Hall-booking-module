@@ -118,16 +118,17 @@ const Bookings = (props) => {
   if (edit === false && update === false) {
     columns.pop();
   }
+
   const oldbooks = () => {
-    if (old == 0) {
-      setold(1);
+    if (old === 0) {
       axios
         .get(`${baseurl}/hall/book/`, {
           params: {
-            old: old,
+            old: 1,
           },
         })
         .then((res) => {
+          setold(1);
           setda(res.data);
           console.log(res.data);
         });
