@@ -1,3 +1,4 @@
+import { ChevronDoubleRightIcon } from "@heroicons/react/outline";
 import { Table, Button, Input, Tag } from "antd";
 import axios from "axios";
 import React from "react";
@@ -10,11 +11,15 @@ const Bookings = (props) => {
 
   const [da, setda] = useState([]);
   const [remark, setremark] = useState("");
-  useEffect(() => {
+  const [old, setold] = useState(0);
+
+  const dbhit = () => {
     axios.get(`${baseurl}/hall/book/`).then((res) => {
-      console.log(res.data);
       setda(res.data);
     });
+  };
+  useEffect(() => {
+    dbhit();
   }, []);
 
   const rem = (e) => {
@@ -33,6 +38,7 @@ const Bookings = (props) => {
     };
     axios.put(`${baseurl}/hall/book/`, dataa).then((res) => {
       console.log(res.data);
+      dbhit();
     });
   };
   const columns = [
@@ -50,6 +56,36 @@ const Bookings = (props) => {
       title: "Purpose",
       dataIndex: "purpose",
       key: "purpose",
+    },
+    {
+      title: "Status",
+      dataIndex: "id",
+      key: "id",
+      render: (t, r, i) => {
+        // console.log(r.status);
+        if (update == false) {
+          if (r.status[0].search(/waiting/) >= 0) {
+            return <Tag color="warning">Pending</Tag>;
+          }
+          if (r.status[0].search(/approved/) >= 0) {
+            return <Tag color="success">Approved</Tag>;
+          }
+          if (r.status[0].search(/rejected/) >= 0) {
+            return <Tag color="error">Rejected</Tag>;
+          }
+        }
+        if (update == true) {
+          if (r.status[1].search(/waiting/) >= 0) {
+            return <Tag color="warning">Pending</Tag>;
+          }
+          if (r.status[1].search(/approved/) >= 0) {
+            return <Tag color="success">Approved</Tag>;
+          }
+          if (r.status[1].search(/rejected/) >= 0) {
+            return <Tag color="error">Rejected</Tag>;
+          }
+        }
+      },
     },
     {
       title: "Action",
@@ -81,104 +117,108 @@ const Bookings = (props) => {
   ];
   if (edit === false && update === false) {
     columns.pop();
-    columns.push({
-      title: "Status",
-      dataIndex: "id",
-      key: "id",
-      render: (t, r, i) => (
-        <>
-          {r.status.map((item) => {
-            if (item.search(/waiting/) >= 0) {
-              return <Tag color="warning">{item}</Tag>;
-            } else if (item.search(/rejected/) >= 0) {
-              return <Tag color="error">{item}</Tag>;
-            } else {
-              return <Tag color="success">{item}</Tag>;
-            }
-          })}
-        </>
-      ),
-    });
   }
+  const oldbooks = () => {
+    if (old == 0) {
+      setold(1);
+      axios
+        .get(`${baseurl}/hall/book/`, {
+          params: {
+            old: old,
+          },
+        })
+        .then((res) => {
+          setda(res.data);
+          console.log(res.data);
+        });
+    } else {
+      setold(0);
+      dbhit();
+    }
+  };
   return (
-    <Table
-      columns={columns}
-      scroll={{ y: 450 }}
-      rowKey="id"
-      expandable={{
-        onExpand: (expanded, record) => {
-          if (expanded === true) {
-            axios
-              .get(`${baseurl}/hall/list/`, {
-                params: {
-                  start: record.start,
-                  end: record.end,
-                  occupancy: record.occupancy,
-                  include_images: "False",
-                },
-              })
-              .then((res) => {
-                let arr = res.data;
-                let selec = document.getElementById(`${record.id}_select`);
-                selec.innerHTML = `<option value=${record.hall}>Keep Requested(${record.hall_name})</option>`;
-                arr.map((item) => {
-                  selec.innerHTML += `<option value='${item.id}' className="bg-white border text-white" >${item.name}</option>`;
+    <>
+      <Button type="primary" className="float-right mb-4" onClick={oldbooks}>
+        {old === 0 ? `Previous Bookings` : `Current Bookings`}
+      </Button>
+      <Table
+        columns={columns}
+        scroll={{ y: 450 }}
+        rowKey="id"
+        expandable={{
+          onExpand: (expanded, record) => {
+            if (expanded === true && edit === true) {
+              axios
+                .get(`${baseurl}/hall/list/`, {
+                  params: {
+                    start: record.start,
+                    end: record.end,
+                    occupancy: record.occupancy,
+                    include_images: "False",
+                  },
+                })
+                .then((res) => {
+                  let arr = res.data;
+                  let selec = document.getElementById(`${record.id}_select`);
+                  selec.innerHTML = `<option value=${record.hall}>Keep Requested(${record.hall_name})</option>`;
+                  arr.map((item) => {
+                    selec.innerHTML += `<option value='${item.id}' className="bg-white border text-white" >${item.name}</option>`;
+                  });
                 });
-              });
-          }
-        },
-        expandedRowRender: (record, index, indent, expanded) => {
-          console.log("expand");
-          return (
-            <>
-              <div className="grid grid-cols-2 grid-rows-2">
-                <span>
-                  <span className="font-bold">From : </span>
-                  <span className="text-lg font-bold">
-                    {record.start.split("T")[0]} /{" "}
-                    {record.start.split("T")[1].substr(0, 5)}
+            }
+          },
+          expandedRowRender: (record, index, indent, expanded) => {
+            return (
+              <>
+                <div className="grid grid-cols-2 grid-rows-2">
+                  <span>
+                    <span className="font-bold">From : </span>
+                    <span className="text-lg font-bold">
+                      {record.start.split("T")[0]} /{" "}
+                      {record.start.split("T")[1].substr(0, 5)}
+                    </span>
                   </span>
-                </span>
-                <span>
-                  <span className="font-bold">To : </span>
-                  <span className="text-lg font-bold">
-                    {record.end.split("T")[0]} /{" "}
-                    {record.end.split("T")[1].substr(0, 5)}
+                  <span>
+                    <span className="font-bold">To : </span>
+                    <span className="text-lg font-bold">
+                      {record.end.split("T")[0]} /{" "}
+                      {record.end.split("T")[1].substr(0, 5)}
+                    </span>
                   </span>
-                </span>
-                <br />
-                <br />
-              </div>
-              <div>
-                {record.remarks.map((item, i) => {
-                  return <Tag color="success">{item}</Tag>;
-                })}
-              </div>
-              <div className="flex flex-col justify-between">
-                {update && (
-                  <>
-                    <span className="font-bold text-lg">Select Place : </span>
-                    <select
-                      id={`${record.id}_select`}
-                      className="w-full h-9 bg-slate-50 focus:bg-grey border"
-                    ></select>
-                  </>
-                )}
+                  <br />
+                  <br />
+                </div>
+                <div>
+                  {record.remarks.map((item, i) => {
+                    return <Tag color="success">{item}</Tag>;
+                  })}
+                </div>
+                <div className="flex flex-col justify-between">
+                  {edit && (
+                    <>
+                      <span className="font-bold text-lg">Select Place : </span>
+                      <select
+                        id={`${record.id}_select`}
+                        className="w-full h-9 bg-slate-50 focus:bg-grey border"
+                      ></select>
+                    </>
+                  )}
 
-                {edit && (
-                  <div className="mt-5">
-                    <span className="font-bold text-lg">Add Remarks : </span>
-                    <Input.TextArea onChange={rem} />{" "}
-                  </div>
-                )}
-              </div>
-            </>
-          );
-        },
-        rowExpandable: (record) => record.name !== "Not Expandable",
-      }}
-      dataSource={da}
-    />
+                  {update && (
+                    <div className="mt-5">
+                      <span className="font-bold text-lg">Add Remarks : </span>
+                      <Input.TextArea onChange={rem} />{" "}
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+          },
+          rowExpandable: (record) => record.name !== "Not Expandable",
+        }}
+        dataSource={da}
+      />
+    </>
   );
 };
 

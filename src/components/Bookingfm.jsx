@@ -40,17 +40,16 @@ const Bookingfm = () => {
   const [fdate, setfdate] = useState("");
   const [tdate, settdate] = useState("");
   const [pcount, setpcount] = useState("");
+  const [loading, setloading] = useState(false);
   const [hlist, sethlist] = useState([
     { id: -1, name: "Select From/To Date and Occupancy" },
   ]);
-
   const onFormLayoutChange = ({ size }) => {
     setComponentSize(size);
   };
   const blurfunc = () => {
     console.log(pcount === "" || tdate === "" || fdate === "");
     if (pcount === "" || tdate === "" || fdate === "") {
-      console.log("empty");
       return;
     }
     axios
@@ -78,19 +77,8 @@ const Bookingfm = () => {
   const changeff = (e) => {
     console.log(e);
     setpcount(e);
-    // console.log(pcount);
   };
   const onFinish = (values) => {
-    // console.log("hello")
-    //   const rangeValue = fieldsValue['range-picker'];
-    //   const rangeTimeValue = fieldsValue['range-time-picker'];
-    //   const values = {
-    //     ...fieldsValue,
-    //     'range-time-picker': [
-    //       rangeTimeValue[0].toISOString(),
-    //       rangeTimeValue[1].toISOString(),
-    //     ],
-    //   };
     values = { ...values, start: fdate, end: tdate };
     axios.post(`${baseurl}/hall/book/`, values).then((res) => {
       console.log(res);
@@ -188,7 +176,12 @@ const Bookingfm = () => {
           <Input.TextArea />
         </Form.Item>
         <Form.Item wrapperCol={{ span: 8, offset: 6 }}>
-          <Button type="primary" htmlType="submit" className="w-full">
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="w-full"
+            loading={loading}
+          >
             Request Booking
           </Button>
         </Form.Item>

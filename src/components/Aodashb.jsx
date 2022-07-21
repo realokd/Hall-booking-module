@@ -1,12 +1,14 @@
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
+  AiOutlineSchedule,
+  AiOutlineAppstoreAdd,
+  AiOutlineUser,
+  LoadingOutlined,
 } from "@ant-design/icons";
+import { Button, Checkbox, Form, Input, Spin } from "antd";
 import { Layout, Menu, Typography } from "antd";
-import { Link, Route, Routes } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import components from "./index";
 import axios from "axios";
@@ -19,19 +21,38 @@ console.log(components);
 const Aodashb = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [comps, setcomps] = useState([]);
+  const [loading, setloading] = useState(true);
+
+  let navigate = useNavigate();
+
   const dynamiccomps = (naam, pro) => {
     // console.log(naam, components[naam]);
     const Comp = components[naam];
     return <Comp {...pro} />;
   };
   useEffect(() => {
+    setloading(true);
+    if (!localStorage.getItem("access")) {
+      navigate("/dashboard");
+    }
     axios.get(`${baseurl}/account/dashboard/`).then((res) => {
-      console.log(res.data);
-      setcomps(res.data.routes);
+      setcomps(res.data);
+      setloading(false);
     });
   }, []);
 
-  return (
+  const antIcon = (
+    <LoadingOutlined
+      style={{
+        fontSize: 24,
+        color: "white",
+      }}
+      spin
+    />
+  );
+  return loading ? (
+    <Spin indicator={antIcon} />
+  ) : (
     <Layout className="w-screen h-screen">
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <div className="text-white text-2xl font-bold text-center mb-5 mt-2">
@@ -78,6 +99,7 @@ const Aodashb = () => {
           }}
         >
           {/* <Outlet /> */}
+
           <Routes>
             {comps.map((item) => {
               return (
@@ -88,10 +110,6 @@ const Aodashb = () => {
               );
             })}
           </Routes>
-
-          {/* <Route path="addhall" element={<Addhall />} />
-          <Route path="bookings" element={<Bookings />} />
-          <Route path="bookingfm" element={<Bookingfm />} /> */}
         </Content>
       </Layout>
     </Layout>

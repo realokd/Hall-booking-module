@@ -1,10 +1,12 @@
 import { Button, Checkbox, Form, Input, Spin } from "antd";
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { baseurl } from "../../src/App";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import { LoadingOutlined } from "@ant-design/icons";
-const Aologin = () => {
+
+const Aologin = ({ login, lo }) => {
   const [loading, setloading] = useState(false);
 
   const antIcon = (
@@ -19,7 +21,6 @@ const Aologin = () => {
   let navigate = useNavigate();
   const onFinish = (values) => {
     setloading(true);
-    console.log("Success:", values);
     axios
       .post(`${baseurl}/account/login/`, values)
       .then((response) => {
@@ -30,8 +31,17 @@ const Aologin = () => {
       })
       .catch((err) => {
         setloading(false);
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Invalide Credentials",
+        });
       });
   };
+
+  useEffect(() => {
+    if (localStorage.getItem("access")) navigate("/dashboard");
+  }, []);
 
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);

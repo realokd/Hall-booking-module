@@ -1,19 +1,35 @@
 /* This MainNav requires Tailwind CSS v2.0+ */
-import { Fragment } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/outline'
-import { Link } from "react-router-dom";
+import { Fragment } from "react";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { baseurl } from "../App";
+import Swal from "sweetalert2";
+import { Typography } from "antd";
+const { Title } = Typography;
+
 const navigation = [
-  { name: 'Home', href: '/', current: false },
-  { name: 'Login', href: 'login', current: false },
-  { name: 'Dashboard', href: 'dashboard', current: false },
-]
+  { name: "Home", href: "/", current: false },
+  { name: "Login", href: "login", current: false },
+];
 
 function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+  return classes.filter(Boolean).join(" ");
 }
 
-export default function MainNav() {
+export default function MainNav(props) {
+  let navigate = useNavigate();
+  const logout = () => {
+    const refr = localStorage.getItem("refresh");
+    axios.post(`${baseurl}/account/logout/`, { refresh: refr }).then((res) => {
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      Swal.fire("Logged Out");
+      navigate("/login");
+      props.login(false);
+    });
+  };
   return (
     <Disclosure as="nav" className="bg-gray-800">
       {({ open }) => (
@@ -36,12 +52,12 @@ export default function MainNav() {
                   <img
                     className="block lg:hidden h-8 w-auto"
                     src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
-                    alt="Workflow"
+                    alt="GoHall"
                   />
                   <img
                     className="hidden lg:block h-8 w-auto"
                     src="https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg"
-                    alt="Workflow"
+                    alt="GoHall"
                   />
                 </div>
                 <div className="hidden sm:block sm:ml-6">
@@ -51,10 +67,12 @@ export default function MainNav() {
                         key={item.name}
                         to={item.href}
                         className={classNames(
-                          item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                          'px-3 py-2 rounded-md text-sm font-medium'
+                          item.current
+                            ? "bg-gray-900 text-white"
+                            : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                          "px-3 py-2 rounded-md text-sm font-medium"
                         )}
-                        aria-current={item.current ? 'page' : undefined}
+                        aria-current={item.current ? "page" : undefined}
                       >
                         {item.name}
                       </Link>
@@ -97,7 +115,10 @@ export default function MainNav() {
                         {({ active }) => (
                           <Link
                             to="/login"
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                            className={classNames(
+                              active ? "bg-gray-100" : "",
+                              "block px-4 py-2 text-sm text-gray-700"
+                            )}
                           >
                             Login
                           </Link>
@@ -107,7 +128,10 @@ export default function MainNav() {
                         {({ active }) => (
                           <Link
                             to="/"
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                            className={classNames(
+                              active ? "bg-gray-100" : "",
+                              "block px-4 py-2 text-sm text-gray-700"
+                            )}
                           >
                             Home
                           </Link>
@@ -117,7 +141,11 @@ export default function MainNav() {
                         {({ active }) => (
                           <a
                             href="#"
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                            className={classNames(
+                              active ? "bg-gray-100" : "",
+                              "block px-4 py-2 text-sm text-gray-700"
+                            )}
+                            onClick={logout}
                           >
                             Sign out
                           </a>
@@ -138,10 +166,12 @@ export default function MainNav() {
                   as="a"
                   href={item.href}
                   className={classNames(
-                    item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                    'block px-3 py-2 rounded-md text-base font-medium'
+                    item.current
+                      ? "bg-gray-900 text-white"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                    "block px-3 py-2 rounded-md text-base font-medium"
                   )}
-                  aria-current={item.current ? 'page' : undefined}
+                  aria-current={item.current ? "page" : undefined}
                 >
                   {item.name}
                 </Disclosure.Button>
@@ -151,5 +181,5 @@ export default function MainNav() {
         </>
       )}
     </Disclosure>
-  )
+  );
 }
