@@ -18,6 +18,7 @@ const { Title } = Typography;
 
 const Addhall = () => {
   const [defaultListOfFiles, setdefaultListOfFiles] = useState([]);
+  const [loading, setloading] = useState(false);
 
   // const onFinish = (values) => {
   //   values = {...values , ...defaultListOfFiles}
@@ -133,7 +134,12 @@ const Addhall = () => {
             span: 24,
           }}
         >
-          <Button type="primary" htmlType="submit" offset={{ span: 6 }}>
+          <Button
+            type="primary"
+            htmlType="submit"
+            offset={{ span: 6 }}
+            loading={loading}
+          >
             + Add Hall
           </Button>
         </Form.Item>

@@ -18,14 +18,6 @@ function App() {
       <MainNav login={setloggedIn} />
       <Routes>
         <Route path="/" element={<Home />} />
-        {/* {loggedIn ? (
-          <Route
-            path="dashboard/*"
-            element={<Aodashb className="h-screen w-screen" />}
-          />
-        ) : (
-          <Route path="login" element={<Aoloapp login={setloggedIn} />} />
-        )} */}
         <Route
           path="dashboard/*"
           element={<Aodashb className="h-screen w-screen" />}
